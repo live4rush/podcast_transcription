@@ -23,6 +23,8 @@ To run the script, use the following command:
 python main.py --query "your_question_here"
 ```
 
+On first run, this will take a very long time depending on hardware as this will query your local model to generate a summary, topics and title as well as embed the data and create the vector store. Every subsequent run will be faster as it will load from the previously created data.
+
 ## Arguments
 
 - --query or -q: The question you want to ask referring to the Marketing Secrets podcast. (Required)
