@@ -1,0 +1,7 @@
+langchain
+llama-cpp-python==0.2.6
+qdrant-client
+InstructorEmbedding
+sentence-transformers
+tiktoken
+lark
