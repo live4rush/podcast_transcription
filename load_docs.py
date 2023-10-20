@@ -1,17 +1,18 @@
 from langchain.document_loaders import TextLoader, DirectoryLoader
 
-def load_docs(pickle = False):
+
+def load_docs(pickle=False):
     if pickle:
         loader = DirectoryLoader(
-        "./docs",
-        glob="**/*.pkl",
-        recursive=True,
-        loader_cls=TextLoader
-    )
+            "./PodcastTranscriptions",
+            glob="**/*.pkl",
+            recursive=True,
+            loader_cls=TextLoader
+        )
     else:
         # Load docs
         loader = DirectoryLoader(
-            "./docs",
+            "./PodcastTranscriptions",
             glob="**/*.txt",
             recursive=True,
 

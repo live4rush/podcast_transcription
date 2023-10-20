@@ -1,7 +1,7 @@
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from summary import generate_summary
 from topics import generate_topics
-from title import generate_title
+from title import get_title_author
 from load_docs import load_docs
 from langchain.llms import LlamaCpp
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -71,7 +71,7 @@ n_threads = 12
 max_tokens = 4096
 MODEL_PATH = "models/llama-2-13b-chat.Q4_K_M.gguf"
 LLM_PATH = "models/"
-QDRANT_PATH = "./qdrant"
+QDRANT_PATH = "qdrant/"
 
 llm = LlamaCpp(
     model_path=MODEL_PATH,
@@ -81,13 +81,13 @@ llm = LlamaCpp(
     f16_kv=True,
     n_ctx=n_ctx,
     max_tokens=max_tokens,
-    temperature=0.4,
+    temperature=0,
     verbose=True
 )
 
 documents = load_docs()
 # We want to turn pkl docs to List<Document>
-pickle_documents = load_pkl_files_from_directory('./docs')
+pickle_documents = load_pkl_files_from_directory('./PodcastTranscriptions')
 # pickle_documents = load_docs(True)
 
 if len(pickle_documents) < len(documents):
@@ -99,11 +99,15 @@ if len(pickle_documents) < len(documents):
             print("Generating summaries and topics for document #",
                   (index+1), "out of ", len(documents))
             doc.page_content = doc.page_content.replace('\n', '')
-            doc.metadata["title"] = generate_title(llm, doc.metadata["source"])
             doc.metadata["summary"] = generate_summary(llm, doc.page_content)
             doc.metadata["topics"] = generate_topics(
                 llm, doc.metadata["summary"])
-            doc.metadata["author"] = "Russell Brunson"
+
+            # Get title and author from filename that closely matches episode
+            title, author = get_title_author("episodes.csv", os.path.splitext(
+                os.path.basename(doc.metadata["source"]))[0])
+            doc.metadata["title"] = title
+            doc.metadata["author"] = author
             with open(doc.metadata["source"].replace(".txt", ".pkl"), 'wb') as file:
                 pickle.dump(doc, file)
 
@@ -174,11 +178,12 @@ else:
 
 # initialize base retriever
 retriever = qdrant.as_retriever(search_type="mmr", search_kwargs={
-                                'k': 8, 'fetch_k': 50, 'lambda_mult': 0.30})
+                                'k': 6, 'fetch_k': 50, 'lambda_mult': 0.30})
 
-prompt_template = """[INST] <<SYS>>
-You are a helpful, respectful and honest assistant. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. Based on the context from prodcast episodes below answer the question to the best of your ability.
+prompt_template = """<s>[INST] <<SYS>>
+You are a helpful, respectful and honest assistant. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. Based on the transcriptions from prodcast episodes below, provide a short answer to the query to the best of your ability. Only use information from the podcast episodes to answer the query.
 <</SYS>>
+
 {context}
 
 {question}
@@ -190,10 +195,8 @@ PROMPT = PromptTemplate(
 chain_type_kwargs = {"prompt": PROMPT}
 
 qa = RetrievalQA.from_chain_type(
-    llm=llm, chain_type="refine", retriever=retriever)
+    llm=llm, chain_type="stuff", retriever=retriever)
 
-# print(qa.run(query))
 result = qa({"query": query})
 
-# print(result["source_documents"])
 print(result["result"])

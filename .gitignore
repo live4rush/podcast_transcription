@@ -4,3 +4,9 @@
 __pycache__/*
 __pycache__/
 qdrant/*
+PodcastEpisodes/
+PodcastEpisodes/*
+PodcastTranscriptions/
+PodcastTranscriptions/*
+models/*.gguf
+episodes.csv

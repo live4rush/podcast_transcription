@@ -1,21 +1,26 @@
-from langchain import PromptTemplate, LLMChain
+import csv
+import difflib
 
 
-def generate_title(llm, filename):
+def get_title_author(csv_file, filename):
+    # Lists to store titles and authors from the CSV
+    titles = []
+    authors = []
 
-    # Map
-    map_template = """[INST] <<SYS>>
-        You are a helpful assistant. Complete the task below. Output the answer only. Do not include any greetings or instructions.
-        <</SYS>>
-        Generate a title for a podcast episode from the filename below:
-        {filename}[/INST]
-        """
-    map_prompt = PromptTemplate.from_template(map_template)
-    map_chain = LLMChain(llm=llm, prompt=map_prompt)
+    # Read the CSV and populate the lists
+    with open(csv_file, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            titles.append(row['Title'])
+            authors.append(row['Author'])
 
-    # Process each chunk through the map_chain
-    title = map_chain.run(filename)
-    title = title.replace(
-        "Sure! Here's a possible title for your podcast episode based on the given filename:", "")
+    # Find the closest match to the filename in the titles list
+    closest_matches = difflib.get_close_matches(filename, titles, n=1)
 
-    return title
+    # If a match is found, return the title and corresponding author
+    if closest_matches:
+        closest_title = closest_matches[0]
+        index = titles.index(closest_title)
+        return closest_title, authors[index]
+    else:
+        return None, None
