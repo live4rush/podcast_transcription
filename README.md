@@ -1,6 +1,6 @@
-# Marketing Secrets Podcast AI Chatbot
+# Interviewkickstart AI Chatbot
 
-This script is designed to perform intelligent queries on a set of documents, particularly podcast episodes from Marketing Secrets by Russell Brunson. It utilizes machine learning models to generate summaries, topics, and titles for each document, and then allows you to run a query to retrieve relevant information.
+This script is designed to perform intelligent queries on a set of documents, particularly class transcripts from interviewkickstart ML course classes. It utilizes machine learning models to generate summaries, topics, and titles for each document, and then allows you to run a query to retrieve relevant information.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ On first run, this will take a very long time depending on hardware as this will
 
 ## Arguments
 
-- --query or -q: The question you want to ask referring to the Marketing Secrets podcast. (Required)
+- --query or -q: The question you want to ask referring to the class transcript. (Required)
 
 ## Notes
 

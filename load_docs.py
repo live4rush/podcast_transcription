@@ -1,10 +1,10 @@
-from langchain.document_loaders import TextLoader, DirectoryLoader
+from langchain_community.document_loaders import TextLoader, DirectoryLoader
 
 
 def load_docs(pickle=False):
     if pickle:
         loader = DirectoryLoader(
-            "./PodcastTranscriptions",
+            "./ClassTranscriptions",
             glob="**/*.pkl",
             recursive=True,
             loader_cls=TextLoader
@@ -12,7 +12,7 @@ def load_docs(pickle=False):
     else:
         # Load docs
         loader = DirectoryLoader(
-            "./PodcastTranscriptions",
+            "./ClassTranscriptions",
             glob="**/*.txt",
             recursive=True,
 
@@ -21,12 +21,5 @@ def load_docs(pickle=False):
 
     docs = loader.load()
 
-    # loaders = [
-    #     TextLoader("./docs/ALittleHackToMakeAmazingAdsThatConvert_no_timestamps.txt"),
-    #     TextLoader("./docs/99YardsDothNotATouchdownMake_no_timestamps.txt"),
-    # ]
-    # docs = []
-    # for loader in loaders:
-    #    docs.extend(loader.load())
 
     return docs

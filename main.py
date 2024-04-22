@@ -1,11 +1,11 @@
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from summary import generate_summary
 from topics import generate_topics
-from title import get_title_author
 from load_docs import load_docs
-from langchain.llms import LlamaCpp
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import Qdrant
+from langchain_community.llms import LlamaCpp
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.vectorstores import Qdrant
 from qdrant_client import QdrantClient
 import pickle
 import os
@@ -87,7 +87,7 @@ llm = LlamaCpp(
 
 documents = load_docs()
 # We want to turn pkl docs to List<Document>
-pickle_documents = load_pkl_files_from_directory('./PodcastTranscriptions')
+pickle_documents = load_pkl_files_from_directory('./ClassTranscriptions')
 # pickle_documents = load_docs(True)
 
 if len(pickle_documents) < len(documents):
@@ -103,11 +103,6 @@ if len(pickle_documents) < len(documents):
             doc.metadata["topics"] = generate_topics(
                 llm, doc.metadata["summary"])
 
-            # Get title and author from filename that closely matches episode
-            title, author = get_title_author("episodes.csv", os.path.splitext(
-                os.path.basename(doc.metadata["source"]))[0])
-            doc.metadata["title"] = title
-            doc.metadata["author"] = author
             with open(doc.metadata["source"].replace(".txt", ".pkl"), 'wb') as file:
                 pickle.dump(doc, file)
 
@@ -152,10 +147,10 @@ else:
     print("Splits saved to file.")
 
 
-if os.path.exists('qdrant/collection/Marketing_Secrets'):
+if os.path.exists('qdrant/collection/IK_Classes'):
     start_time = time.time()
     client = QdrantClient(path=QDRANT_PATH)
-    collection_name = "Marketing_Secrets"
+    collection_name = "IK_Classes"
     qdrant = Qdrant(client, collection_name, embeddings)
     end_time = time.time()
     # Calculate and print the elapsed time
@@ -168,7 +163,7 @@ else:
         documents=splits,
         embedding=embeddings,
         path=QDRANT_PATH,
-        collection_name="Marketing_Secrets",
+        collection_name="IK_Classes",
         force_recreate=False,
     )
     end_time = time.time()
@@ -181,7 +176,7 @@ retriever = qdrant.as_retriever(search_type="mmr", search_kwargs={
                                 'k': 6, 'fetch_k': 50, 'lambda_mult': 0.30})
 
 prompt_template = """<s>[INST] <<SYS>>
-You are a helpful, respectful and honest assistant. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. Based on the transcriptions from prodcast episodes below, provide a short answer to the query to the best of your ability. Only use information from the podcast episodes to answer the query.
+You are a helpful, respectful and honest assistant. Please ensure that your responses are socially unbiased and positive in nature. If a question does not make any sense, or is not factually coherent, explain why instead of answering something not correct. If you don't know the answer to a question, please don't share false information. Based on the transcriptions from IK classes below, provide a short answer to the query to the best of your ability. Only use information from the IK classes to answer the query.
 <</SYS>>
 
 {context}
