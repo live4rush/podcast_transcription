@@ -9,4 +9,3 @@ ClassVTTFiles/*
 ClassTranscriptions/
 ClassTranscriptions/*
 models/*.gguf
-episodes.csv
